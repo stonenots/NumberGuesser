@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NumberGuesser</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ── SETUP SCREEN ── -->
+<div id="screen-setup" class="screen">
+  <div class="container narrow">
+    <h1>NumberGuesser</h1>
+    <p class="subtitle">Enter player names to get started</p>
+
+    <!-- Winning numbers reference -->
+    <div id="prize-table-setup" class="prize-table-wrap"></div>
+
+    <!-- Add player -->
+    <div class="add-player-row">
+      <input type="text" id="player-name-input" placeholder="Player name" maxlength="30" />
+      <button id="add-player-btn">Add Player</button>
+    </div>
+    <div id="player-name-error" class="input-error"></div>
+
+    <!-- Player list -->
+    <div id="player-list" class="player-list"></div>
+
+    <button id="start-game-btn" class="submit-btn" disabled>Start Game →</button>
+  </div>
+</div>
+
+<!-- ── ENTRY SCREEN ── -->
+<div id="screen-entry" class="screen hidden">
+  <div class="container wide">
+    <div class="entry-header">
+      <div>
+        <h1>NumberGuesser</h1>
+        <p class="subtitle" id="entry-subtitle"></p>
+      </div>
+      <div class="player-tabs" id="player-tabs"></div>
+    </div>
+
+    <!-- Prize reference (compact) -->
+    <div id="prize-table-entry" class="prize-table-wrap"></div>
+
+    <!-- Input -->
+    <div class="input-section">
+      <div class="digit-selector">
+        <button class="digit-btn active" data-digits="2">2 Digits</button>
+        <button class="digit-btn" data-digits="3">3 Digits</button>
+      </div>
+      <div class="input-group">
+        <input type="text"   id="guess-input" placeholder="XX" maxlength="2" />
+        <span class="times-sign">×</span>
+        <input type="number" id="sets-input"  placeholder="Sets" min="1" value="1" />
+        <button id="add-btn">Add</button>
+      </div>
+      <div id="input-error" class="input-error"></div>
+    </div>
+
+    <!-- Entry table for current player -->
+    <div class="entry-list-header">
+      <span>Numbers: <strong id="entry-count">0</strong> / <span id="entry-max"></span></span>
+      <button id="clear-btn" class="link-btn">Clear all</button>
+    </div>
+    <div class="entry-table-wrap">
+      <table class="entry-table">
+        <thead id="entry-thead"></thead>
+        <tbody id="entry-tbody"></tbody>
+      </table>
+      <div id="entry-empty" class="entry-empty">No numbers added yet</div>
+    </div>
+
+    <div class="entry-actions">
+      <button id="check-btn" class="submit-btn" disabled>Check Results →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── RESULTS SCREEN ── -->
+<div id="screen-results" class="screen hidden">
+  <div class="container wide">
+    <h1>Results</h1>
+    <p class="subtitle" id="results-subtitle"></p>
+
+    <!-- Per-player result tabs -->
+    <div class="player-tabs" id="result-tabs"></div>
+
+    <!-- Result content per player -->
+    <div id="result-panels"></div>
+
+    <!-- Overall leaderboard -->
+    <div id="leaderboard" class="leaderboard"></div>
+
+    <div class="results-actions">
+      <button id="export-btn" class="export-btn">Export Results ↗</button>
+      <button id="play-again-btn" class="action-btn">Play Again</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
