@@ -8,95 +8,276 @@
 </head>
 <body>
 
-<!-- ── SETUP SCREEN ── -->
-<div id="screen-setup" class="screen">
-  <div class="container narrow">
-    <h1>NumberGuesser</h1>
-    <p class="subtitle">Enter player names to get started</p>
+<div class="app" id="app">
 
-    <!-- Winning numbers reference -->
-    <div id="prize-table-setup" class="prize-table-wrap"></div>
+  <!-- ══════════════════════════════════════════════════════
+       LEFT PANEL — prizes + player list
+  ══════════════════════════════════════════════════════ -->
+  <aside class="left-panel">
+    <div class="left-inner">
 
-    <!-- Add player -->
-    <div class="add-player-row">
-      <input type="text" id="player-name-input" placeholder="Player name" maxlength="30" />
-      <button id="add-player-btn">Add Player</button>
-    </div>
-    <div id="player-name-error" class="input-error"></div>
-
-    <!-- Player list -->
-    <div id="player-list" class="player-list"></div>
-
-    <button id="start-game-btn" class="submit-btn" disabled>Start Game →</button>
-  </div>
-</div>
-
-<!-- ── ENTRY SCREEN ── -->
-<div id="screen-entry" class="screen hidden">
-  <div class="container wide">
-    <div class="entry-header">
-      <div>
+      <div class="brand">
         <h1>NumberGuesser</h1>
-        <p class="subtitle" id="entry-subtitle"></p>
+        <p class="tagline">Pick your numbers, win big</p>
       </div>
-      <div class="player-tabs" id="player-tabs"></div>
-    </div>
 
-    <!-- Prize reference (compact) -->
-    <div id="prize-table-entry" class="prize-table-wrap"></div>
+      <!-- Prize config (setup) / Prize reference (results) — collapsible -->
+      <section class="panel-section" id="section-prizes">
+        <div class="section-label collapsible" id="prizes-toggle">
+          <span>Winning Numbers &amp; Points</span>
+          <span class="collapse-arrow" id="prizes-arrow">▾</span>
+        </div>
+        <div id="prizes-content">
+        <div id="prize-config-area">
+          <div class="prize-config-wrap">
+            <table class="prize-config-table">
+              <thead>
+                <tr>
+                  <th style="text-align:left">Prize</th>
+                  <th>Win #</th>
+                  <th>Pts/Set</th>
+                </tr>
+              </thead>
+              <tbody id="prize-config-body"></tbody>
+            </table>
+          </div>
+          <div id="prize-config-error" class="input-error"></div>
+        </div>
+        <div id="prize-ref-area" class="hidden">
+          <div id="prize-table-entry" class="prize-table-wrap"></div>
+        </div>
+        </div><!-- /prizes-content -->
+      </section>
 
-    <!-- Input -->
-    <div class="input-section">
-      <div class="digit-selector">
-        <button class="digit-btn active" data-digits="2">2 Digits</button>
-        <button class="digit-btn" data-digits="3">3 Digits</button>
+      <!-- Player list -->
+      <section class="panel-section" id="section-players">
+        <div class="section-label">
+          Players
+          <span id="player-count-badge" class="player-count-badge hidden"></span>
+        </div>
+
+        <!-- Setup: chips list -->
+        <div id="player-setup-area">
+          <div id="player-list" class="player-list">
+            <span class="player-list-empty">No players yet</span>
+          </div>
+        </div>
+
+        <!-- Results: colored tabs -->
+        <div id="player-game-area" class="hidden">
+          <div class="player-tabs" id="player-tabs"></div>
+        </div>
+      </section>
+
+      <!-- Start / Check buttons -->
+      <div id="start-area">
+        <button id="start-game-btn" class="btn-primary full-width" disabled>Check Results →</button>
       </div>
-      <div class="input-group">
-        <input type="text"   id="guess-input" placeholder="XX" maxlength="2" />
-        <span class="times-sign">×</span>
-        <input type="number" id="sets-input"  placeholder="Sets" min="1" value="1" />
-        <button id="add-btn">Add</button>
+
+      <!-- Leaderboard (results) -->
+      <section class="panel-section hidden" id="section-leaderboard">
+        <div class="section-label">Leaderboard</div>
+        <div id="leaderboard" class="leaderboard"></div>
+      </section>
+
+      <!-- Play again -->
+      <div id="play-again-area" class="hidden">
+        <button id="play-again-btn" class="btn-secondary full-width">Play Again</button>
       </div>
-      <div id="input-error" class="input-error"></div>
-    </div>
 
-    <!-- Entry table for current player -->
-    <div class="entry-list-header">
-      <span>Numbers: <strong id="entry-count">0</strong> / <span id="entry-max"></span></span>
-      <button id="clear-btn" class="link-btn">Clear all</button>
     </div>
-    <div class="entry-table-wrap">
-      <table class="entry-table">
-        <thead id="entry-thead"></thead>
-        <tbody id="entry-tbody"></tbody>
-      </table>
-      <div id="entry-empty" class="entry-empty">No numbers added yet</div>
-    </div>
+  </aside>
 
-    <div class="entry-actions">
-      <button id="check-btn" class="submit-btn" disabled>Check Results →</button>
+  <!-- ══════════════════════════════════════════════════════
+       RIGHT PANEL — add player form / results
+  ══════════════════════════════════════════════════════ -->
+  <main class="right-panel">
+    <div class="right-inner">
+
+      <!-- ── ADD PLAYER form (setup mode) ── -->
+      <div id="right-setup" class="right-section">
+
+        <div class="right-header">
+          <div class="right-title" id="setup-form-title">Add Player</div>
+          <button id="export-btn" class="btn-export hidden">Export ↗</button>
+        </div>
+
+        <!-- Player name -->
+        <div class="form-row">
+          <label class="form-label">Player Name</label>
+          <div class="add-player-row">
+            <input type="text" id="player-name-input" placeholder="Enter name…" maxlength="30" />
+          </div>
+          <div id="player-name-error" class="input-error"></div>
+        </div>
+
+        <!-- Input mode toggle -->
+        <div class="form-row">
+          <label class="form-label">Numbers</label>
+          <div class="mode-toggle">
+            <button class="mode-btn active" id="mode-single">Single</button>
+            <button class="mode-btn" id="mode-raw">Raw Text</button>
+          </div>
+
+          <!-- Single mode -->
+          <div id="input-single">
+            <div class="digit-selector">
+              <button class="digit-btn active" data-digits="2">2 Digits</button>
+              <button class="digit-btn" data-digits="3">3 Digits</button>
+            </div>
+            <div class="input-row-with-pool">
+              <div class="input-group">
+                <input type="text"   id="guess-input" placeholder="XX" maxlength="2" />
+                <span class="times-sign">×</span>
+                <input type="number" id="sets-input"  placeholder="Sets" min="1" value="1" />
+              </div>
+              <div class="prize-pool-selector pool-compact" id="prize-pool-selector">
+                <button class="pool-btn active" data-pool="both">Both</button>
+                <button class="pool-btn" data-pool="upper">Up</button>
+                <button class="pool-btn" data-pool="lower">Low</button>
+              </div>
+              <button id="add-btn">Add</button>
+            </div>
+          </div>
+
+          <!-- Raw text mode -->
+          <div id="input-raw" class="hidden">
+            <div class="raw-pool-row">
+              <span class="form-label" style="margin-bottom:0">Pool for raw entries:</span>
+              <div class="prize-pool-selector pool-compact" id="raw-pool-selector">
+                <button class="pool-btn active" data-pool="both">Both</button>
+                <button class="pool-btn" data-pool="upper">Up</button>
+                <button class="pool-btn" data-pool="lower">Low</button>
+              </div>
+            </div>
+            <p class="raw-hint">
+              One entry per line: <code>NUMBER SETS</code> or <code>NUMBER=SETS</code><br/>
+              Swap: <code>NUMBER SETSxSETS</code> or <code>NUMBER SETS*SETS</code> or <code>NUMBER=SETS*SETS</code>
+            </p>
+            <textarea id="raw-input" placeholder="12 10&#10;22 5&#10;333 10x10" rows="5"></textarea>
+            <button id="raw-add-btn">Parse &amp; Add</button>
+          </div>
+
+          <div id="input-error" class="input-error"></div>
+        </div>
+
+        <!-- Entry list for current player being added -->
+        <div class="entry-list-header">
+          <span>Numbers: <strong id="entry-count">0</strong> / <span id="entry-max"></span></span>
+          <button id="clear-btn" class="link-btn">Clear all</button>
+        </div>
+        <div class="entry-table-wrap">
+          <table class="entry-table">
+            <thead id="entry-thead"></thead>
+            <tbody id="entry-tbody"></tbody>
+          </table>
+          <div id="entry-empty" class="entry-empty">No numbers added yet</div>
+        </div>
+
+        <!-- Add player button -->
+        <button id="add-player-btn" class="btn-add-player full-width" disabled>+ Add Player</button>
+
+        <!-- Live stats table -->
+        <div id="number-stats" class="number-stats"></div>
+
+      </div>
+
+      <!-- ── RESULTS panel ── -->
+      <div id="right-results" class="right-section hidden">
+
+        <div class="right-header">
+          <div class="right-title">Results</div>
+          <button id="export-btn-results" class="btn-export">Export ↗</button>
+        </div>
+
+        <!-- Number stats summary -->
+        <div id="number-stats-results" class="number-stats"></div>
+
+        <div id="result-panels"></div>
+
+      </div>
+
     </div>
-  </div>
+  </main>
+
 </div>
 
-<!-- ── RESULTS SCREEN ── -->
-<div id="screen-results" class="screen hidden">
-  <div class="container wide">
-    <h1>Results</h1>
-    <p class="subtitle" id="results-subtitle"></p>
+<!-- ══════════════════════════════════════════════════════
+     MODAL — view/edit player
+══════════════════════════════════════════════════════ -->
+<div id="player-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Player</div>
+      <button class="modal-close" id="modal-close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="form-label">Player Name</label>
+        <div class="add-player-row">
+          <input type="text" id="modal-name-input" maxlength="30" />
+        </div>
+        <div id="modal-name-error" class="input-error"></div>
+      </div>
 
-    <!-- Per-player result tabs -->
-    <div class="player-tabs" id="result-tabs"></div>
+      <div class="form-row">
+        <label class="form-label">Numbers</label>
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="modal-mode-single">Single</button>
+          <button class="mode-btn" id="modal-mode-raw">Raw Text</button>
+        </div>
 
-    <!-- Result content per player -->
-    <div id="result-panels"></div>
+        <div id="modal-input-single">
+          <div class="digit-selector">
+            <button class="digit-btn active modal-digit-btn" data-digits="2">2 Digits</button>
+            <button class="digit-btn modal-digit-btn" data-digits="3">3 Digits</button>
+          </div>
+          <div class="input-row-with-pool">
+            <div class="input-group">
+              <input type="text" id="modal-guess-input" placeholder="XX" maxlength="2" />
+              <span class="times-sign">×</span>
+              <input type="number" id="modal-sets-input" min="1" value="1" />
+            </div>
+            <div class="prize-pool-selector pool-compact" id="modal-pool-selector">
+              <button class="pool-btn active" data-pool="both">Both</button>
+              <button class="pool-btn" data-pool="upper">Up</button>
+              <button class="pool-btn" data-pool="lower">Low</button>
+            </div>
+            <button id="modal-add-btn" class="btn-add-player" style="padding:9px 16px;font-size:0.85rem;">Add</button>
+          </div>
+        </div>
 
-    <!-- Overall leaderboard -->
-    <div id="leaderboard" class="leaderboard"></div>
+        <div id="modal-input-raw" class="hidden">
+          <div class="raw-pool-row">
+            <span class="form-label" style="margin-bottom:0">Pool:</span>
+            <div class="prize-pool-selector pool-compact" id="modal-raw-pool-selector">
+              <button class="pool-btn active" data-pool="both">Both</button>
+              <button class="pool-btn" data-pool="upper">Up</button>
+              <button class="pool-btn" data-pool="lower">Low</button>
+            </div>
+          </div>
+          <textarea id="modal-raw-input" placeholder="12 10&#10;22=5&#10;333 10x10" rows="4" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.07);color:#fff;font-family:monospace;font-size:0.9rem;outline:none;resize:vertical;margin-bottom:6px;"></textarea>
+          <button id="modal-raw-add-btn" style="width:100%;padding:9px;border-radius:8px;border:none;background:linear-gradient(135deg,#e94560,#c0392b);color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;">Parse & Add</button>
+        </div>
 
-    <div class="results-actions">
-      <button id="export-btn" class="export-btn">Export Results ↗</button>
-      <button id="play-again-btn" class="action-btn">Play Again</button>
+        <div id="modal-input-error" class="input-error"></div>
+      </div>
+
+      <div class="entry-list-header">
+        <span>Numbers: <strong id="modal-entry-count">0</strong></span>
+        <button id="modal-clear-btn" class="link-btn">Clear all</button>
+      </div>
+      <div class="entry-table-wrap">
+        <table class="entry-table">
+          <thead id="modal-entry-thead"></thead>
+          <tbody id="modal-entry-tbody"></tbody>
+        </table>
+        <div id="modal-entry-empty" class="entry-empty">No numbers</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="modal-cancel">Cancel</button>
+      <button class="btn-save" id="modal-save">Save Changes</button>
     </div>
   </div>
 </div>
