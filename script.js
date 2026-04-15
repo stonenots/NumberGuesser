@@ -219,11 +219,25 @@ function renderPending() {
 
 function addPendingEntry() {
   const val = guessInput.value.trim(), sets = parseInt(setsInput.value);
+  const doSwap = $('swap-check').checked;
   inputErrorEl.textContent = '';
   if (!/^\d+$/.test(val) || val.length !== selectedDigits) { inputErrorEl.textContent = `Enter exactly ${selectedDigits} digits.`; return; }
   if (isNaN(sets) || sets < minSets || sets > maxSets) { inputErrorEl.textContent = `Sets: ${minSets}–${maxSets}.`; return; }
-  if (pendingEntries.length >= maxEntries) { inputErrorEl.textContent = `Max ${maxEntries}.`; return; }
-  pendingEntries.push({ number: val, digits: selectedDigits, sets, pool: selectedPool });
+
+  if (doSwap) {
+    const perms = allPermutations(val);
+    let added = 0;
+    perms.forEach(p => {
+      if (pendingEntries.length >= maxEntries) return;
+      pendingEntries.push({ number: p, digits: selectedDigits, sets, pool: selectedPool, swapOf: p !== val ? val : undefined });
+      added++;
+    });
+    if (added === 0) { inputErrorEl.textContent = `Max ${maxEntries}.`; return; }
+  } else {
+    if (pendingEntries.length >= maxEntries) { inputErrorEl.textContent = `Max ${maxEntries}.`; return; }
+    pendingEntries.push({ number: val, digits: selectedDigits, sets, pool: selectedPool });
+  }
+
   guessInput.value = ''; setsInput.value = 1; guessInput.focus();
   renderPending();
 }
@@ -246,6 +260,23 @@ function addPlayerWithEntries() {
 // ═══════════════════════════════════════════════════════════════════════════════
 function swapNumber(n) { return n.split('').reverse().join(''); }
 
+// Generate all unique permutations of a number string
+function allPermutations(num) {
+  const chars = num.split('');
+  if (chars.length === 2) {
+    const perms = new Set([num, chars[1] + chars[0]]);
+    return [...perms];
+  }
+  // 3-digit: generate all 6 permutations, deduplicate
+  const perms = new Set();
+  for (let i = 0; i < 3; i++)
+    for (let j = 0; j < 3; j++)
+      for (let k = 0; k < 3; k++)
+        if (i !== j && j !== k && i !== k)
+          perms.add(chars[i] + chars[j] + chars[k]);
+  return [...perms];
+}
+
 function parseRawText(text) {
   const lines = text.split('\n'), parsed = [], errors = [];
   lines.forEach((raw, li) => {
@@ -266,8 +297,12 @@ function parseRawText(text) {
     if (sm) {
       const s1 = +sm[1], s2 = +sm[2];
       if (s1 < minSets || s1 > maxSets || s2 < minSets || s2 > maxSets) { errors.push(`Line ${li+1}: sets out of range`); return; }
+      // First entry gets s1, all swap permutations get s2
+      const perms = allPermutations(num);
       parsed.push({ number: num, digits, sets: s1 });
-      const sw = swapNumber(num); if (sw !== num) parsed.push({ number: sw, digits, sets: s2, swapOf: num });
+      perms.forEach(p => {
+        if (p !== num) parsed.push({ number: p, digits, sets: s2, swapOf: num });
+      });
     } else if (pm) {
       const s = +pm[1];
       if (s < minSets || s > maxSets) { errors.push(`Line ${li+1}: sets out of range`); return; }
@@ -702,6 +737,11 @@ startGameBtn.addEventListener('click', () => {
 $('play-again-btn').addEventListener('click', () => {
   players = []; pendingEntries = [];
   buildPrizeConfigRows(); renderPlayerList(); resetForm();
+  // Clear stats and results
+  $('number-stats').innerHTML = '';
+  $('number-stats-results').innerHTML = '';
+  $('result-panels').innerHTML = '';
+  $('leaderboard').innerHTML = '';
   showMode('setup');
 });
 
@@ -790,11 +830,25 @@ function renderModalEntries() {
 
 function addModalEntry() {
   const val = modalGuessInput.value.trim(), sets = parseInt(modalSetsInput.value);
+  const doSwap = $('modal-swap-check').checked;
   modalInputError.textContent = '';
   if (!/^\d+$/.test(val) || val.length !== modalDigits) { modalInputError.textContent = `Enter exactly ${modalDigits} digits.`; return; }
   if (isNaN(sets) || sets < minSets || sets > maxSets) { modalInputError.textContent = `Sets: ${minSets}–${maxSets}.`; return; }
-  if (modalEntries.length >= maxEntries) { modalInputError.textContent = `Max ${maxEntries}.`; return; }
-  modalEntries.push({ number: val, digits: modalDigits, sets, pool: modalPool });
+
+  if (doSwap) {
+    const perms = allPermutations(val);
+    let added = 0;
+    perms.forEach(p => {
+      if (modalEntries.length >= maxEntries) return;
+      modalEntries.push({ number: p, digits: modalDigits, sets, pool: modalPool, swapOf: p !== val ? val : undefined });
+      added++;
+    });
+    if (added === 0) { modalInputError.textContent = `Max ${maxEntries}.`; return; }
+  } else {
+    if (modalEntries.length >= maxEntries) { modalInputError.textContent = `Max ${maxEntries}.`; return; }
+    modalEntries.push({ number: val, digits: modalDigits, sets, pool: modalPool });
+  }
+
   modalGuessInput.value = ''; modalSetsInput.value = 1; modalGuessInput.focus();
   renderModalEntries();
 }

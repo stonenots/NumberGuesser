@@ -552,6 +552,24 @@ h1 {
 
 .input-row-with-pool .input-group { flex: 1; min-width: 180px; margin-bottom: 0; }
 
+.swap-check {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.swap-check input[type="checkbox"] {
+  accent-color: #e94560;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
 .raw-pool-row {
   display: flex;
   align-items: center;

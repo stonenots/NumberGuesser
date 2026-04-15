@@ -131,6 +131,7 @@
                 <span class="times-sign">×</span>
                 <input type="number" id="sets-input"  placeholder="Sets" min="1" value="1" />
               </div>
+              <label class="swap-check"><input type="checkbox" id="swap-check" /> Swap</label>
               <div class="prize-pool-selector pool-compact" id="prize-pool-selector">
                 <button class="pool-btn active" data-pool="both">Both</button>
                 <button class="pool-btn" data-pool="upper">Up</button>
@@ -152,7 +153,8 @@
             </div>
             <p class="raw-hint">
               One entry per line: <code>NUMBER SETS</code> or <code>NUMBER=SETS</code><br/>
-              Swap: <code>NUMBER SETSxSETS</code> or <code>NUMBER SETS*SETS</code> or <code>NUMBER=SETS*SETS</code>
+              Swap: <code>NUMBER SETSxSETS</code> — 2D swaps to reverse, 3D generates all permutations<br/>
+              e.g. <code>12=60×60</code> → 12, 21 &nbsp;|&nbsp; <code>123=10×10</code> → 123, 132, 213, 231, 312, 321
             </p>
             <textarea id="raw-input" placeholder="12 10&#10;22 5&#10;333 10x10" rows="5"></textarea>
             <button id="raw-add-btn">Parse &amp; Add</button>
@@ -238,6 +240,7 @@
               <span class="times-sign">×</span>
               <input type="number" id="modal-sets-input" min="1" value="1" />
             </div>
+            <label class="swap-check"><input type="checkbox" id="modal-swap-check" /> Swap</label>
             <div class="prize-pool-selector pool-compact" id="modal-pool-selector">
               <button class="pool-btn active" data-pool="both">Both</button>
               <button class="pool-btn" data-pool="upper">Up</button>
