@@ -74,19 +74,21 @@ function showMode(mode) {
 // ═══════════════════════════════════════════════════════════════════════════════
 function buildPrizeConfigRows() {
   prizeConfigBody.innerHTML = '';
-  addRow(`<td colspan="3" class="section-divider">Upper Prize</td>`);
+  addRow(`<td colspan="4" class="section-divider">Upper Prize</td>`);
   addRow(`
     <td><div class="prize-name-cell"><span class="prize-badge" style="background:#FFD700;">3D</span>Winning Number</div></td>
-    <td colspan="2"><input type="text" id="upper-number-input" value="${upperPrize.number}" maxlength="3" placeholder="000" class="wn-input" /></td>`);
+    <td colspan="3"><input type="text" id="upper-number-input" value="${upperPrize.number}" maxlength="3" placeholder="000" class="wn-input" /></td>`);
   upperPrize.prizes.forEach((p, i) => addRow(`
     <td><div class="prize-name-cell"><span class="prize-badge" style="background:${p.color};">${p.digits}D</span>${p.name}</div></td>
     <td><small style="color:rgba(255,255,255,0.35)">${p.desc}</small></td>
-    <td><input type="number" id="upper-pts-${i}" value="${p.points}" min="0" class="pts-input" /></td>`));
-  addRow(`<td colspan="3" class="section-divider">Lower Prize</td>`);
+    <td><input type="number" id="upper-pts-${i}" value="${p.points}" min="0" class="pts-input" /></td>
+    <td>${p.digits === 3 ? `<input type="number" id="upper-swap-pts-${i}" value="${p.swapPoints || 0}" min="0" class="pts-input" />` : '<span style="color:rgba(255,255,255,0.2)">—</span>'}</td>`));
+  addRow(`<td colspan="4" class="section-divider">Lower Prize</td>`);
   lowerPrize.prizes.forEach((p, i) => addRow(`
     <td><div class="prize-name-cell"><span class="prize-badge" style="background:${p.color};">${p.digits}D</span>${p.name}</div></td>
     <td><input type="text" id="lower-wn-${i}" value="${p.number}" maxlength="${p.digits}" placeholder="${'0'.repeat(p.digits)}" class="wn-input" /></td>
-    <td><input type="number" id="lower-pts-${i}" value="${p.points}" min="0" class="pts-input" /></td>`));
+    <td><input type="number" id="lower-pts-${i}" value="${p.points}" min="0" class="pts-input" /></td>
+    <td>${p.digits === 3 ? `<input type="number" id="lower-swap-pts-${i}" value="${p.swapPoints || 0}" min="0" class="pts-input" />` : '<span style="color:rgba(255,255,255,0.2)">—</span>'}</td>`));
   document.querySelectorAll('.wn-input').forEach(inp =>
     inp.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d]/g, ''); }));
   function addRow(html) { const tr = document.createElement('tr'); tr.innerHTML = html; prizeConfigBody.appendChild(tr); }
@@ -101,6 +103,11 @@ function applyPrizeConfig() {
     const v = parseInt($(`upper-pts-${i}`).value);
     if (isNaN(v) || v < 0) { prizeConfigErr.textContent = `${upperPrize.prizes[i].name}: invalid pts.`; return false; }
     upperPrize.prizes[i].points = v;
+    if (upperPrize.prizes[i].digits === 3) {
+      const sv = parseInt($(`upper-swap-pts-${i}`).value);
+      if (isNaN(sv) || sv < 0) { prizeConfigErr.textContent = `${upperPrize.prizes[i].name}: invalid swap pts.`; return false; }
+      upperPrize.prizes[i].swapPoints = sv;
+    }
   }
   for (let i = 0; i < lowerPrize.prizes.length; i++) {
     const p = lowerPrize.prizes[i];
@@ -109,6 +116,11 @@ function applyPrizeConfig() {
     if (wn.length !== p.digits || !/^\d+$/.test(wn)) { prizeConfigErr.textContent = `${p.name}: must be ${p.digits} digits.`; return false; }
     if (isNaN(v) || v < 0) { prizeConfigErr.textContent = `${p.name}: invalid pts.`; return false; }
     p.number = wn; p.points = v;
+    if (p.digits === 3) {
+      const sv = parseInt($(`lower-swap-pts-${i}`).value);
+      if (isNaN(sv) || sv < 0) { prizeConfigErr.textContent = `${p.name}: invalid swap pts.`; return false; }
+      p.swapPoints = sv;
+    }
   }
   return true;
 }
@@ -119,18 +131,20 @@ function buildPrizeTableHTML() {
     <td><span class="winning-num">${p.id === 'upper3' ? upperPrize.number : upperPrize.number.slice(-2)}</span></td>
     <td style="text-align:center">${p.digits}</td>
     <td class="pts-cell" style="text-align:right">${p.points.toLocaleString()}</td>
+    <td class="pts-cell" style="text-align:right">${p.digits === 3 ? (p.swapPoints || 0).toLocaleString() : '—'}</td>
   </tr>`).join('');
   const lRows = lowerPrize.prizes.map(p => `<tr>
     <td style="text-align:left"><span class="prize-badge" style="background:${p.color};">${p.digits}D</span>${p.name}</td>
     <td><span class="winning-num">${p.number}</span></td>
     <td style="text-align:center">${p.digits}</td>
     <td class="pts-cell" style="text-align:right">${p.points.toLocaleString()}</td>
+    <td class="pts-cell" style="text-align:right">${p.digits === 3 ? (p.swapPoints || 0).toLocaleString() : '—'}</td>
   </tr>`).join('');
   return `<table>
-    <thead><tr><th style="text-align:left">Prize</th><th>Win #</th><th>Digits</th><th style="text-align:right">Pts/Set</th></tr></thead>
+    <thead><tr><th style="text-align:left">Prize</th><th>Win #</th><th>Digits</th><th style="text-align:right">Pts/Set</th><th style="text-align:right">Swap Pts</th></tr></thead>
     <tbody>
-      <tr><td colspan="4" class="section-divider">Upper Prize</td></tr>${uRows}
-      <tr><td colspan="4" class="section-divider">Lower Prize</td></tr>${lRows}
+      <tr><td colspan="5" class="section-divider">Upper Prize</td></tr>${uRows}
+      <tr><td colspan="5" class="section-divider">Lower Prize</td></tr>${lRows}
     </tbody></table>`;
 }
 
@@ -317,6 +331,7 @@ function parseRawText(text) {
 // ═══════════════════════════════════════════════════════════════════════════════
 function evaluateEntry(entry, pool) {
   pool = pool || entry.pool || 'both';
+  const isSwap = !!entry.swapOf;
   const results = [];
   // Upper prizes — only if pool is 'upper' or 'both'
   upperPrize.prizes.forEach(p => {
@@ -324,13 +339,15 @@ function evaluateEntry(entry, pool) {
     let hit = false;
     if (p.id === 'upper3' && entry.digits === 3) hit = entry.number === upperPrize.number;
     else if (p.id === 'upper2' && entry.digits === 2) hit = entry.number === upperPrize.number.slice(-2);
-    results.push({ prize: p, hit, pts: hit ? p.points * entry.sets : 0 });
+    const ptsPerSet = (hit && isSwap && p.digits === 3 && p.swapPoints != null) ? p.swapPoints : p.points;
+    results.push({ prize: p, hit, pts: hit ? ptsPerSet * entry.sets : 0 });
   });
   // Lower prizes — only if pool is 'lower' or 'both'
   lowerPrize.prizes.forEach(p => {
     if (pool === 'upper') { results.push({ prize: p, hit: false, pts: 0 }); return; }
     const hit = entry.digits === p.digits && entry.number === p.number;
-    results.push({ prize: p, hit, pts: hit ? p.points * entry.sets : 0 });
+    const ptsPerSet = (hit && isSwap && p.digits === 3 && p.swapPoints != null) ? p.swapPoints : p.points;
+    results.push({ prize: p, hit, pts: hit ? ptsPerSet * entry.sets : 0 });
   });
   return results;
 }
@@ -538,8 +555,8 @@ function exportResults() {
   }).sort((a, b) => b.net - a.net);
   const rc = ['gold', 'silver', 'bronze'];
 
-  const winRows = upperPrize.prizes.map(p => `<tr><td>Upper</td><td><span class="badge" style="background:${p.color}">${p.digits}D</span>${p.name}</td><td class="mono">${p.id==='upper3'?upperPrize.number:upperPrize.number.slice(-2)}</td><td class="pts">${p.points.toLocaleString()}</td></tr>`).join('')
-    + lowerPrize.prizes.map(p => `<tr><td>Lower</td><td><span class="badge" style="background:${p.color}">${p.digits}D</span>${p.name}</td><td class="mono">${p.number}</td><td class="pts">${p.points.toLocaleString()}</td></tr>`).join('');
+  const winRows = upperPrize.prizes.map(p => `<tr><td>Upper</td><td><span class="badge" style="background:${p.color}">${p.digits}D</span>${p.name}</td><td class="mono">${p.id==='upper3'?upperPrize.number:upperPrize.number.slice(-2)}</td><td class="pts">${p.points.toLocaleString()}</td><td class="pts">${p.digits===3?(p.swapPoints||0).toLocaleString():'—'}</td></tr>`).join('')
+    + lowerPrize.prizes.map(p => `<tr><td>Lower</td><td><span class="badge" style="background:${p.color}">${p.digits}D</span>${p.name}</td><td class="mono">${p.number}</td><td class="pts">${p.points.toLocaleString()}</td><td class="pts">${p.digits===3?(p.swapPoints||0).toLocaleString():'—'}</td></tr>`).join('');
 
   const uH = upperPrize.prizes.map(p => `<th style="color:${p.color}">${p.name}</th>`).join('');
   const lH = lowerPrize.prizes.map(p => `<th style="color:${p.color}">${p.name}</th>`).join('');
@@ -946,7 +963,15 @@ const prizesContent = $('prizes-content');
 prizesToggle.addEventListener('click', () => {
   const collapsed = prizesContent.classList.toggle('collapsed');
   prizesArrow.classList.toggle('collapsed', collapsed);
+  if (!collapsed) {
+    prizesContent.style.maxHeight = prizesContent.scrollHeight + 'px';
+  } else {
+    prizesContent.style.maxHeight = '0';
+  }
 });
+
+// Set initial max-height so the transition works
+prizesContent.style.maxHeight = prizesContent.scrollHeight + 'px';
 
 buildPrizeConfigRows();
 renderPlayerList();
