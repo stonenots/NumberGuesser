@@ -938,6 +938,14 @@ $('modal-raw-add-btn').addEventListener('click', () => {
 // BOOT
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// Warn before leaving if there's any data
+window.addEventListener('beforeunload', (e) => {
+  if (players.length > 0 || pendingEntries.length > 0) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
 // Collapsible prize panel
 const prizesToggle  = $('prizes-toggle');
 const prizesArrow   = $('prizes-arrow');
@@ -946,7 +954,10 @@ const prizesContent = $('prizes-content');
 prizesToggle.addEventListener('click', () => {
   const collapsed = prizesContent.classList.toggle('collapsed');
   prizesArrow.classList.toggle('collapsed', collapsed);
+  prizesToggle.classList.toggle('open', !collapsed);
 });
+// Start open
+prizesToggle.classList.add('open');
 
 buildPrizeConfigRows();
 renderPlayerList();

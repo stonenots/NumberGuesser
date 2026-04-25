@@ -1022,7 +1022,10 @@ textarea#raw-input::placeholder { color: rgba(255,255,255,0.2); font-family: mon
   align-items: center;
   user-select: none;
   transition: color 0.2s;
+  margin-bottom: 0;
 }
+
+.section-label.collapsible.open { margin-bottom: 12px; }
 
 .section-label.collapsible:hover { color: rgba(255,255,255,0.55); }
 
@@ -1033,8 +1036,8 @@ textarea#raw-input::placeholder { color: rgba(255,255,255,0.2); font-family: mon
 
 .collapse-arrow.collapsed { transform: rotate(-90deg); }
 
-.collapsible-content { overflow: hidden; transition: max-height 0.3s ease; }
-.collapsible-content.collapsed { max-height: 0 !important; overflow: hidden; }
+.collapsible-content { display: block; }
+.collapsible-content.collapsed { display: none; }
 
 /* ── Number stats ─────────────────────────────────────────────────────────── */
 .number-stats {
@@ -1143,6 +1146,50 @@ textarea#raw-input::placeholder { color: rgba(255,255,255,0.2); font-family: mon
   .setup-placeholder { min-height: 30vh; }
 
   .result-table-wrap { max-height: 280px; }
+
+  /* Fix iOS auto-zoom: ensure inputs are at least 16px */
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  .add-player-row input,
+  .prize-config-table input {
+    font-size: 16px;
+  }
+
+  /* Reduce number display sizes */
+  input[type="text"] {
+    letter-spacing: 3px;
+    padding: 10px 8px;
+  }
+
+  .num-cell { font-size: 0.82rem; letter-spacing: 2px; }
+  .winning-num { font-size: 0.78rem; letter-spacing: 2px; }
+
+  /* Compact input row */
+  .input-row-with-pool {
+    gap: 6px;
+  }
+
+  .input-row-with-pool .input-group { min-width: 140px; }
+
+  .digit-selector { gap: 4px; }
+  .digit-btn { padding: 7px; font-size: 0.8rem; }
+
+  .pool-btn { padding: 5px 8px; font-size: 0.68rem; }
+
+  /* Smaller result table text */
+  .result-table { font-size: 0.72rem; }
+  .result-table thead th { font-size: 0.6rem; padding: 5px 6px; }
+  .result-table tbody td { padding: 5px 6px; }
+  .match-cell { font-size: 0.65rem; }
+
+  .stats-table { font-size: 0.72rem; }
+  .stats-table thead th { font-size: 0.6rem; padding: 5px 6px; }
+  .stats-table tbody td { padding: 5px 6px; }
+
+  /* Modal adjustments */
+  .modal { max-width: 100%; margin: 10px; border-radius: 12px; }
+  .modal-body { padding: 12px 14px 16px; }
 }
 
 /* ── Modal ─────────────────────────────────────────────────────────────────── */
