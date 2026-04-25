@@ -76,19 +76,20 @@ function buildPrizeConfigRows() {
   prizeConfigBody.innerHTML = '';
   addRow(`<td colspan="4" class="section-divider">Upper Prize</td>`);
   addRow(`
-    <td><div class="prize-name-cell"><span class="prize-badge" style="background:#FFD700;">3D</span>Winning Number</div></td>
-    <td colspan="3"><input type="text" id="upper-number-input" value="${upperPrize.number}" maxlength="3" placeholder="000" class="wn-input" /></td>`);
+    <td><div class="prize-name-cell"><span class="prize-badge" style="background:#FFD700;">3D</span>Winning #</div></td>
+    <td><input type="text" id="upper-number-input" value="${upperPrize.number}" maxlength="3" placeholder="000" class="wn-input" /></td>
+    <td colspan="2"></td>`);
   upperPrize.prizes.forEach((p, i) => addRow(`
     <td><div class="prize-name-cell"><span class="prize-badge" style="background:${p.color};">${p.digits}D</span>${p.name}</div></td>
-    <td><small style="color:rgba(255,255,255,0.35)">${p.desc}</small></td>
+    <td><small style="color:rgba(255,255,255,0.3);font-size:0.65rem">${p.desc}</small></td>
     <td><input type="number" id="upper-pts-${i}" value="${p.points}" min="0" class="pts-input" /></td>
-    <td>${p.digits === 3 ? `<input type="number" id="upper-swap-pts-${i}" value="${p.swapPoints || 0}" min="0" class="pts-input" />` : '<span style="color:rgba(255,255,255,0.2)">—</span>'}</td>`));
+    <td>${p.digits === 3 ? `<input type="number" id="upper-swap-pts-${i}" value="${p.swapPoints || 0}" min="0" class="pts-input" />` : '<span style="color:rgba(255,255,255,0.15)">—</span>'}</td>`));
   addRow(`<td colspan="4" class="section-divider">Lower Prize</td>`);
   lowerPrize.prizes.forEach((p, i) => addRow(`
     <td><div class="prize-name-cell"><span class="prize-badge" style="background:${p.color};">${p.digits}D</span>${p.name}</div></td>
     <td><input type="text" id="lower-wn-${i}" value="${p.number}" maxlength="${p.digits}" placeholder="${'0'.repeat(p.digits)}" class="wn-input" /></td>
     <td><input type="number" id="lower-pts-${i}" value="${p.points}" min="0" class="pts-input" /></td>
-    <td>${p.digits === 3 ? `<input type="number" id="lower-swap-pts-${i}" value="${p.swapPoints || 0}" min="0" class="pts-input" />` : '<span style="color:rgba(255,255,255,0.2)">—</span>'}</td>`));
+    <td>${p.digits === 3 ? `<input type="number" id="lower-swap-pts-${i}" value="${p.swapPoints || 0}" min="0" class="pts-input" />` : '<span style="color:rgba(255,255,255,0.15)">—</span>'}</td>`));
   document.querySelectorAll('.wn-input').forEach(inp =>
     inp.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d]/g, ''); }));
   function addRow(html) { const tr = document.createElement('tr'); tr.innerHTML = html; prizeConfigBody.appendChild(tr); }
@@ -331,24 +332,45 @@ function parseRawText(text) {
 // ═══════════════════════════════════════════════════════════════════════════════
 function evaluateEntry(entry, pool) {
   pool = pool || entry.pool || 'both';
-  const isSwap = !!entry.swapOf;
   const results = [];
+
+  // Helper: check if two numbers are permutations of each other
+  function isPermutation(a, b) {
+    return a.length === b.length && a.split('').sort().join('') === b.split('').sort().join('');
+  }
+
   // Upper prizes — only if pool is 'upper' or 'both'
   upperPrize.prizes.forEach(p => {
-    if (pool === 'lower') { results.push({ prize: p, hit: false, pts: 0 }); return; }
-    let hit = false;
-    if (p.id === 'upper3' && entry.digits === 3) hit = entry.number === upperPrize.number;
-    else if (p.id === 'upper2' && entry.digits === 2) hit = entry.number === upperPrize.number.slice(-2);
-    const ptsPerSet = (hit && isSwap && p.digits === 3 && p.swapPoints != null) ? p.swapPoints : p.points;
-    results.push({ prize: p, hit, pts: hit ? ptsPerSet * entry.sets : 0 });
+    if (pool === 'lower') { results.push({ prize: p, hit: false, hitType: null, pts: 0 }); return; }
+    let hit = false, hitType = null, ptsPerSet = 0;
+    if (p.id === 'upper3' && entry.digits === 3) {
+      if (entry.number === upperPrize.number) {
+        hit = true; hitType = 'exact'; ptsPerSet = p.points;
+      } else if (p.swapPoints && isPermutation(entry.number, upperPrize.number)) {
+        hit = true; hitType = 'swap'; ptsPerSet = p.swapPoints;
+      }
+    } else if (p.id === 'upper2' && entry.digits === 2) {
+      if (entry.number === upperPrize.number.slice(-2)) {
+        hit = true; hitType = 'exact'; ptsPerSet = p.points;
+      }
+    }
+    results.push({ prize: p, hit, hitType, pts: hit ? ptsPerSet * entry.sets : 0 });
   });
+
   // Lower prizes — only if pool is 'lower' or 'both'
   lowerPrize.prizes.forEach(p => {
-    if (pool === 'upper') { results.push({ prize: p, hit: false, pts: 0 }); return; }
-    const hit = entry.digits === p.digits && entry.number === p.number;
-    const ptsPerSet = (hit && isSwap && p.digits === 3 && p.swapPoints != null) ? p.swapPoints : p.points;
-    results.push({ prize: p, hit, pts: hit ? ptsPerSet * entry.sets : 0 });
+    if (pool === 'upper') { results.push({ prize: p, hit: false, hitType: null, pts: 0 }); return; }
+    let hit = false, hitType = null, ptsPerSet = 0;
+    if (entry.digits === p.digits) {
+      if (entry.number === p.number) {
+        hit = true; hitType = 'exact'; ptsPerSet = p.points;
+      } else if (p.digits === 3 && p.swapPoints && isPermutation(entry.number, p.number)) {
+        hit = true; hitType = 'swap'; ptsPerSet = p.swapPoints;
+      }
+    }
+    results.push({ prize: p, hit, hitType, pts: hit ? ptsPerSet * entry.sets : 0 });
   });
+
   return results;
 }
 
@@ -376,12 +398,20 @@ function buildNumberStats(targetId) {
   if (!el) return;
 
   // Collect winning numbers for highlight
-  const winSet = new Set();
+  // Collect winning numbers and their permutations for highlight
+  const winExact = new Set();
+  const winSwap  = new Set();
   upperPrize.prizes.forEach(p => {
-    if (p.id === 'upper3') winSet.add(upperPrize.number);
-    if (p.id === 'upper2') winSet.add(upperPrize.number.slice(-2));
+    if (p.id === 'upper3') {
+      winExact.add(upperPrize.number);
+      if (p.swapPoints) allPermutations(upperPrize.number).forEach(pm => winSwap.add(pm));
+    }
+    if (p.id === 'upper2') winExact.add(upperPrize.number.slice(-2));
   });
-  lowerPrize.prizes.forEach(p => winSet.add(p.number));
+  lowerPrize.prizes.forEach(p => {
+    winExact.add(p.number);
+    if (p.digits === 3 && p.swapPoints) allPermutations(p.number).forEach(pm => winSwap.add(pm));
+  });
 
   // Aggregate: number → { totalSets, players: [{name, sets, colorIdx}] }
   const map = {};
@@ -411,19 +441,19 @@ function buildNumberStats(targetId) {
   const totalCost = totalSets * costPerSet;
 
   const rows = entries.map(e => {
-    const isWin = winSet.has(e.number);
-    const c = pColor(0); // default
+    const isExact   = winExact.has(e.number);
+    const isSwapWin = !isExact && winSwap.has(e.number);
     const playerCells = e.players.map(p => {
       const pc = pColor(p.ci);
       return `<span style="color:${pc.text};margin-right:6px;">${p.name}: <strong>${p.sets}</strong></span>`;
     }).join('');
 
-    return `<tr class="${isWin ? 'stat-row-win' : ''}">
+    return `<tr class="${isExact || isSwapWin ? 'stat-row-win' : ''}">
       <td class="num-cell">${e.number}</td>
       <td class="sets-cell">×${e.totalSets}</td>
       <td style="text-align:center">${e.playerCount}</td>
       <td class="stat-players-cell">${playerCells}</td>
-      <td style="text-align:center">${isWin ? '<span class="stat-winner-badge">★ WIN</span>' : '—'}</td>
+      <td style="text-align:center">${isExact ? '<span class="stat-winner-badge">★ EXACT</span>' : isSwapWin ? '<span class="stat-winner-badge" style="color:#f5a623;">⟳ SWAP</span>' : '—'}</td>
     </tr>`;
   }).join('');
 
@@ -472,7 +502,7 @@ function buildResultsScreen() {
         const rt  = res.reduce((s, r) => s + r.pts, 0);
         total += rt;
         const cells = res.map(r => r.hit
-          ? `<td class="match-cell hit">✓ +${r.pts.toLocaleString()}</td>`
+          ? `<td class="match-cell hit">${r.hitType === 'swap' ? '⟳' : '✓'} +${r.pts.toLocaleString()}</td>`
           : `<td class="match-cell miss">✗</td>`).join('');
         rows += `<tr class="${rt > 0 ? 'row-won' : 'row-lost'}">
           <td class="num-cell">${e.number}${e.swapOf ? ' <span class="swap-tag">swap</span>' : ''}</td>
@@ -573,7 +603,7 @@ function exportResults() {
     const rows = player.entries.map(e => {
       const res = evaluateEntry(e), rt = res.reduce((s,r)=>s+r.pts,0);
       const poolLabel = (e.pool || 'both').toUpperCase();
-      const cells = res.map(r => r.hit ? `<td class="hit">✓ +${r.pts.toLocaleString()}</td>` : `<td class="miss">✗</td>`).join('');
+      const cells = res.map(r => r.hit ? `<td class="hit">${r.hitType === 'swap' ? '⟳' : '✓'} +${r.pts.toLocaleString()}</td>` : `<td class="miss">✗</td>`).join('');
       return `<tr class="${rt>0?'won':'lost'}">
         <td class="mono">${esc(e.number)}${e.swapOf?' <em>swap</em>':''}</td>
         <td class="center">×${e.sets}</td>
@@ -657,7 +687,7 @@ tr.won td{background:rgba(46,204,113,.07)}tr.lost td{opacity:.35}
 <h1>NumberGuesser — Results</h1>
 <p class="meta">Generated: ${ts} · ${players.length} player${players.length!==1?'s':''} · Cost/set: ${costPerSet}</p>
 <p class="section-title">Winning Numbers</p>
-<div class="prize-ref"><table><thead><tr><th>Session</th><th>Prize</th><th>Win #</th><th>Pts/Set</th></tr></thead><tbody>${winRows}</tbody></table></div>
+<div class="prize-ref"><table><thead><tr><th>Session</th><th>Prize</th><th>Win #</th><th>Pts/Set</th><th>Swap Pts</th></tr></thead><tbody>${winRows}</tbody></table></div>
 <p class="section-title">Leaderboard</p>
 <div class="leaderboard"><div class="lb-head">Rankings (sorted by net)</div><table>
   <thead><tr><th>#</th><th>Player</th><th>Sets</th><th>Cost</th><th>Winnings</th><th>Net</th></tr></thead>

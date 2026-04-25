@@ -7,6 +7,7 @@ body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   color: #fff;
   font-size: 14px;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* ── App shell ────────────────────────────────────────────────────────────── */
@@ -72,37 +73,43 @@ h1 {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.78rem;
+  table-layout: fixed;
 }
 
+.prize-config-table col.col-prize  { width: 40%; }
+.prize-config-table col.col-win    { width: 20%; }
+.prize-config-table col.col-pts    { width: 20%; }
+.prize-config-table col.col-swap   { width: 20%; }
+
 .prize-config-table th {
-  padding: 7px 10px;
+  padding: 6px 4px;
   background: rgba(255,255,255,0.06);
   color: rgba(255,255,255,0.35);
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   white-space: nowrap;
 }
 
 .prize-config-table td {
-  padding: 6px 8px;
+  padding: 5px 4px;
   border-top: 1px solid rgba(255,255,255,0.05);
   vertical-align: middle;
 }
 
 .prize-config-table input {
   width: 100%;
-  padding: 6px 8px;
+  padding: 5px 4px;
   border-radius: 6px;
   border: 1px solid rgba(255,255,255,0.12);
   background: rgba(255,255,255,0.07);
   color: #fff;
-  font-size: 0.85rem;
+  font-size: 16px;
   font-weight: 600;
   text-align: center;
   outline: none;
   transition: border 0.2s;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 
 .prize-config-table input[type="number"] { letter-spacing: 0; }
@@ -162,7 +169,7 @@ h1 {
   color: rgba(255,255,255,0.7);
 }
 
-.winning-num { font-weight: 700; letter-spacing: 3px; font-size: 0.85rem; }
+.winning-num { font-weight: 700; letter-spacing: 2px; font-size: 0.82rem; }
 .pts-cell    { color: #f5a623; font-weight: 700; }
 
 .group-header {
@@ -191,7 +198,7 @@ h1 {
   border: 1px solid rgba(255,255,255,0.15);
   background: rgba(255,255,255,0.07);
   color: #fff;
-  font-size: 0.85rem;
+  font-size: 16px;
   outline: none;
   transition: border 0.2s;
   min-width: 0;
@@ -458,7 +465,7 @@ h1 {
   border: 1px solid rgba(255,255,255,0.18);
   background: rgba(255,255,255,0.07);
   color: #fff;
-  font-size: 1rem;
+  font-size: 16px;
   outline: none;
   transition: border 0.2s;
 }
@@ -665,10 +672,10 @@ input[type="text"] {
   border: 1px solid rgba(255,255,255,0.18);
   background: rgba(255,255,255,0.07);
   color: #fff;
-  font-size: 1.2rem;
+  font-size: 16px;
   font-weight: 700;
   text-align: center;
-  letter-spacing: 5px;
+  letter-spacing: 3px;
   outline: none;
   transition: border 0.2s;
   min-width: 0;
@@ -689,7 +696,7 @@ input[type="number"] {
   border: 1px solid rgba(255,255,255,0.18);
   background: rgba(255,255,255,0.07);
   color: #fff;
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 600;
   text-align: center;
   outline: none;
@@ -741,7 +748,7 @@ textarea#raw-input {
   border: 1px solid rgba(255,255,255,0.18);
   background: rgba(255,255,255,0.07);
   color: #fff;
-  font-size: 0.95rem;
+  font-size: 16px;
   font-family: monospace;
   letter-spacing: 1px;
   outline: none;
@@ -817,7 +824,7 @@ textarea#raw-input::placeholder { color: rgba(255,255,255,0.2); font-family: mon
 
 .entry-table tbody tr:hover td { background: rgba(255,255,255,0.03); }
 
-.num-cell  { font-weight: 700; letter-spacing: 3px; font-size: 0.9rem; }
+.num-cell  { font-weight: 700; letter-spacing: 2px; font-size: 0.85rem; }
 .sets-cell { color: #f5a623; font-weight: 700; text-align: center; }
 
 .swap-tag {
@@ -1146,24 +1153,6 @@ textarea#raw-input::placeholder { color: rgba(255,255,255,0.2); font-family: mon
   .setup-placeholder { min-height: 30vh; }
 
   .result-table-wrap { max-height: 280px; }
-
-  /* Fix iOS auto-zoom: ensure inputs are at least 16px */
-  input[type="text"],
-  input[type="number"],
-  textarea,
-  .add-player-row input,
-  .prize-config-table input {
-    font-size: 16px;
-  }
-
-  /* Reduce number display sizes */
-  input[type="text"] {
-    letter-spacing: 3px;
-    padding: 10px 8px;
-  }
-
-  .num-cell { font-size: 0.82rem; letter-spacing: 2px; }
-  .winning-num { font-size: 0.78rem; letter-spacing: 2px; }
 
   /* Compact input row */
   .input-row-with-pool {
